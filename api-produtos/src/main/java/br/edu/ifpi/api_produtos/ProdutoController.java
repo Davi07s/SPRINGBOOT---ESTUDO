@@ -1,22 +1,17 @@
 package br.edu.ifpi.api_produtos;
 
+import java.util.ArrayList;
 import java.util.List;
-import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-
 @RestController
-@RequestMapping
 public class ProdutoController {
 
-    private final ProdutoService produtoService;
-
-    public ProdutoController(ProdutoService produtoService) {
-        this.produtoService = produtoService;
-    }
+    // Lista que funcionará como um "banco de dados" temporário
+    private final List<Produto> produtos = new ArrayList<>();
 
     // GET /ola
     @GetMapping("/ola")
@@ -27,34 +22,92 @@ public class ProdutoController {
     // GET /produtos
     @GetMapping("/produtos")
     public List<Produto> listar() {
-        return List.of(
-                new Produto(1L, "Mouse", "Informatica", 82.00)
-        );
+        return produtos;
     }
 
     // GET /produtos/{id}
     @GetMapping("/produtos/{id}")
-    public ResponseEntity<Produto> buscar(@PathVariable("id") Long id) {
+    public ResponseEntity<Produto> buscar(@PathVariable Long id) {
 
-        Produto produto = new Produto(
-                id,
-                "Produto" + id,
-                "Informatica",
-                82.00 + id
-        );
+        for (Produto produto : produtos) {
+            if (produto.getId().equals(id)) {
+                return ResponseEntity.ok(produto);
+            }
+        }
 
-        return ResponseEntity.ok(produto);
+        return ResponseEntity.notFound().build();
     }
 
     // POST /produtos
     @PostMapping("/produtos")
-    public ResponseEntity<ProdutoDTO> criar(
-            @Valid @RequestBody ProdutoDTO dto) {
+    public ResponseEntity<Produto> criar(@RequestBody Produto produto) {
 
-        ProdutoDTO criado = produtoService.salvar(dto);
+        produtos.add(produto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(criado);
+                .body(produto);
+    }
+
+    // PUT /produtos/{id}
+    @PutMapping("/produtos/{id}")
+    public ResponseEntity<Produto> atualizar(
+            @PathVariable Long id,
+            @RequestBody Produto produtoAtualizado) {
+
+        for (int i = 0; i < produtos.size(); i++) {
+
+            if (produtos.get(i).getId().equals(id)) {
+
+                produtoAtualizado.setId(id);
+                produtos.set(i, produtoAtualizado);
+
+                return ResponseEntity.ok(produtoAtualizado);
+            }
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+    // DELETE /produtos/{id}
+    @DeleteMapping("/produtos/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+
+        for (Produto produto : produtos) {
+
+            if (produto.getId().equals(id)) {
+                produtos.remove(produto);
+                return ResponseEntity.noContent().build();
+            }
+        }
+
+        return ResponseEntity.notFound().build();
     }
 }
+
+
+/*
+// GET /produtos
+@GetMapping("/produtos")
+public List<Produto> listar() {
+    return List.of(
+            new Produto(1L, "Mouse", "Informatica", 82.00)
+    );
+}
+ */
+
+// GET /produtos/{id}
+/*
+@GetMapping("/produtos/{id}")
+public ResponseEntity<Produto> buscar(@PathVariable("id") Long id) {
+
+    Produto produto = new Produto(
+            id,
+            "Produto" + id,
+            "Informatica",
+            82.00 + id
+    );
+
+    return ResponseEntity.ok(produto);
+}
+*/
