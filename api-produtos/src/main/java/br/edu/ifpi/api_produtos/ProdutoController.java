@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity; // METODO DE UM CONTROLLER QUE RETORNA O OBJETO COM O STATUS ESPECIFICO E UM CORPO
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -47,6 +47,19 @@ public class ProdutoController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(produto);
+    }
+
+    // POST /produtos/lote
+    // PERMITE CRIAR NOVOS DADOS EM LOTES UTILIZANDO LIST
+    @PostMapping("/produtos/lote")
+    public ResponseEntity<List<Produto>> criarVarios(
+            @RequestBody List<Produto> novosProdutos) {
+
+        produtos.addAll(novosProdutos);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(novosProdutos);
     }
 
     // PUT /produtos/{id}
